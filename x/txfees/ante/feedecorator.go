@@ -35,12 +35,18 @@ func (mfd MempoolFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate b
 		return ctx, sdkerrors.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
 	}
 
-	if !simulate && ctx.BlockHeight() > 0 && feeTx.GetGas() == 0 {
+	//skip fee check if simulate, as in Cosmos-SDK
+	//(https://github.com/cosmos/cosmos-sdk/blob/25e7f9bee2b35f0211b0e323dd062b55bef987b7/x/auth/ante/fee.go#L55)
+	if simulate {
+		return next(ctx, tx, simulate)
+	}
+
+	if ctx.BlockHeight() > 0 && feeTx.GetGas() == 0 {
 		return ctx, sdkerrors.Wrap(sdkerrors.ErrInvalidGasLimit, "must provide positive gas")
 	}
 
-	//TODO: skip on simulate
-
+	//Skip on deliverTx, as in Cosmos-SDK
+	// (https://github.com/cosmos/cosmos-sdk/blob/60e6274d0fdaeb86da4521f7ee8b8b2178a845b5/x/auth/ante/validator_tx_fee.go#L24)
 	if !ctx.IsCheckTx() && !ctx.IsReCheckTx() {
 		return next(ctx, tx, simulate)
 	}
