@@ -13,6 +13,10 @@ import (
 	keeper "github.com/osmosis-labs/osmosis/v15/x/txfees/keeper"
 )
 
+const (
+	gasEstimationMempoolDecorator = 50_000
+)
+
 // MempoolFeeDecorator will check if the transaction's fee is at least as large
 // as the local validator's minimum gasFee (defined in validator config).
 // If fee is too low, decorator returns error and tx is rejected from mempool.
@@ -35,9 +39,8 @@ func (mfd MempoolFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate b
 		return ctx, sdkerrors.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
 	}
 
-	//skip fee check if simulate, as in Cosmos-SDK
-	//(https://github.com/cosmos/cosmos-sdk/blob/25e7f9bee2b35f0211b0e323dd062b55bef987b7/x/auth/ante/fee.go#L55)
 	if simulate {
+		ctx.GasMeter().ConsumeGas(gasEstimationMempoolDecorator, "mempool decorator")
 		return next(ctx, tx, simulate)
 	}
 
