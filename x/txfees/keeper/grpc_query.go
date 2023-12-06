@@ -23,6 +23,13 @@ func NewQuerier(k Keeper) Querier {
 	return Querier{Keeper: k}
 }
 
+func (q Querier) Params(ctx context.Context, _ *types.QueryParamsRequest) (*types.QueryParamsResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	params := q.Keeper.GetParams(sdkCtx)
+
+	return &types.QueryParamsResponse{Params: params}, nil
+}
+
 func (q Querier) FeeTokens(ctx context.Context, _ *types.QueryFeeTokensRequest) (*types.QueryFeeTokensResponse, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	feeTokens := q.Keeper.GetFeeTokens(sdkCtx)

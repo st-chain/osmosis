@@ -16,6 +16,8 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 		panic(fmt.Sprintf("module account %s does not exist", types.ModuleName))
 	}
 
+	k.SetParams(ctx, genState.Params)
+
 	err := k.SetBaseDenom(ctx, genState.Basedenom)
 	if err != nil {
 		panic(err)
@@ -25,9 +27,10 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 		panic(err)
 	}
 
-	info := k.epochKeeper.GetEpochInfo(ctx, types.EpochIdentifier)
+	epochIdentifier := k.GetParams(ctx).EpochIdentifier
+	info := k.epochKeeper.GetEpochInfo(ctx, epochIdentifier)
 	if info.Identifier == "" {
-		panic(fmt.Sprintf("epoch info for identifier %s does not exist", types.EpochIdentifier))
+		panic(fmt.Sprintf("epoch info for identifier %s does not exist", epochIdentifier))
 	}
 }
 
@@ -36,5 +39,6 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 	genesis := types.DefaultGenesis()
 	genesis.Basedenom, _ = k.GetBaseDenom(ctx)
 	genesis.Feetokens = k.GetFeeTokens(ctx)
+	genesis.Params = k.GetParams(ctx)
 	return genesis
 }

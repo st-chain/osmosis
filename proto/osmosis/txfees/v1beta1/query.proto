@@ -6,10 +6,17 @@ import "google/api/annotations.proto";
 import "google/protobuf/duration.proto";
 
 import "osmosis/txfees/v1beta1/feetoken.proto";
+import "osmosis/txfees/v1beta1/genesis.proto";
 
 option go_package = "github.com/osmosis-labs/osmosis/v15/x/txfees/types";
 
 service Query {
+    // Params returns params.
+    rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+      option (google.api.http).get = "/osmosis/txfees/v1beta1/params";
+    }
+
+
   // FeeTokens returns a list of all the accepted fee tokens and their
   // corresponding pools. It does not include the BaseDenom, which has its own
   // query endpoint
@@ -35,6 +42,13 @@ service Query {
     option (google.api.http).get = "/osmosis/txfees/v1beta1/base_denom";
   }
 }
+
+
+message QueryParamsRequest {}
+message QueryParamsResponse {
+  Params params = 1 [ (gogoproto.nullable) = false ];
+}
+
 
 message QueryFeeTokensRequest {}
 message QueryFeeTokensResponse {
