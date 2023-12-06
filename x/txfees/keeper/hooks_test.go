@@ -58,7 +58,7 @@ func (suite *KeeperTestSuite) TestTxFeesAfterEpochEnd() {
 
 		// End of epoch, so all the non-osmo fee amount should be swapped to osmo and burned
 		futureCtx := suite.Ctx.WithBlockTime(time.Now().Add(time.Minute))
-		suite.App.TxFeesKeeper.AfterEpochEnd(futureCtx, types.EpochIdentifier, int64(1))
+		suite.App.TxFeesKeeper.AfterEpochEnd(futureCtx, "day", int64(1))
 
 		// check the balance of the native-basedenom in module
 		balances = suite.App.BankKeeper.GetAllBalances(suite.Ctx, moduleAddrFee)

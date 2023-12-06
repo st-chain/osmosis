@@ -5,6 +5,7 @@ import sdk "github.com/cosmos/cosmos-sdk/types"
 // DefaultGenesis returns the default txfee genesis state.
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
+		Params:    DefaultParams(),
 		Basedenom: sdk.DefaultBondDenom,
 		Feetokens: []FeeToken{},
 	}
@@ -15,6 +16,11 @@ func DefaultGenesis() *GenesisState {
 // This is done in InitGenesis.
 func (gs GenesisState) Validate() error {
 	err := sdk.ValidateDenom(gs.Basedenom)
+	if err != nil {
+		return err
+	}
+
+	err = gs.Params.Validate()
 	if err != nil {
 		return err
 	}
