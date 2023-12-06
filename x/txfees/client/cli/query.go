@@ -15,6 +15,8 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdFeeTokens(),
 		GetCmdDenomPoolID(),
 		GetCmdBaseDenom(),
+		osmocli.GetParams[*types.QueryParamsRequest](
+			types.ModuleName, types.NewQueryClient),
 	)
 
 	return cmd
