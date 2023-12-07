@@ -179,12 +179,9 @@ func (server msgServer) SwapExactAmountIn(goCtx context.Context, msg *types.MsgS
 		return nil, err
 	}
 
-	routesForTakerFee := poolmanagertypes.SwapRoutesUnion{
-		InRoutes:  msg.Routes,
-		OutRoutes: nil,
-		Type:      "in",
-	}
-	err = server.keeper.chargeTakerFee(ctx, takerFeesCoins, sender, routesForTakerFee, msg.Routes[len(msg.Routes)-1].TokenOutDenom)
+	//first pool for taker fee swaps if needed
+	takerFeeRoute := msg.Routes[0]
+	err = server.keeper.chargeTakerFee(ctx, takerFeesCoins, sender, takerFeeRoute)
 	if err != nil {
 		return nil, err
 	}
@@ -227,12 +224,16 @@ func (server msgServer) SwapExactAmountOut(goCtx context.Context, msg *types.Msg
 	tokenInCoin := sdk.NewCoin(msg.Routes[0].TokenInDenom, tokenInAmount)
 	tokenInAmountWithTakerFee, takerFeeCoin := server.keeper.AddTakerFee(tokenInCoin, takerFee)
 
-	routesForTakerFee := poolmanagertypes.SwapRoutesUnion{
-		InRoutes:  nil,
-		OutRoutes: msg.Routes,
-		Type:      "out",
+	//first pool for taker fee swaps if needed
+	takerFeeRoute := poolmanagertypes.SwapAmountInRoute{}
+	takerFeeRoute.PoolId = msg.Routes[0].PoolId
+	if len(msg.Routes) > 1 {
+		takerFeeRoute.TokenOutDenom = msg.Routes[1].TokenInDenom
+	} else {
+		takerFeeRoute.TokenOutDenom = msg.TokenOutDenom()
 	}
-	err = server.keeper.chargeTakerFee(ctx, takerFeeCoin, sender, routesForTakerFee, msg.TokenOut.Denom)
+
+	err = server.keeper.chargeTakerFee(ctx, takerFeeCoin, sender, takerFeeRoute)
 	if err != nil {
 		return nil, err
 	}

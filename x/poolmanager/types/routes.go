@@ -4,12 +4,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-type SwapRoutesUnion struct {
-	InRoutes  []SwapAmountInRoute
-	OutRoutes []SwapAmountOutRoute
-	Type      string // "in" for InRoutes, "out" for OutRoutes
-}
-
 type SwapAmountInRoutes []SwapAmountInRoute
 
 func (routes SwapAmountInRoutes) Validate() error {

@@ -1,8 +1,6 @@
 package keeper
 
 import (
-	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
@@ -13,7 +11,7 @@ import (
 // If the taker fee coin is the base denom, send it to the txfees module
 // If the taker fee coin is a registered fee token, send it to the txfees module
 // If the taker fee coin is not supported, swap it to the base denom on the first pool, then send it to the txfees module
-func (k Keeper) chargeTakerFee(ctx sdk.Context, takerFeeCoin sdk.Coin, sender sdk.AccAddress, routes poolmanagertypes.SwapRoutesUnion, denomOut string) error {
+func (k Keeper) chargeTakerFee(ctx sdk.Context, takerFeeCoin sdk.Coin, sender sdk.AccAddress, route poolmanagertypes.SwapAmountInRoute) error {
 	// Check if the taker fee coin is the base denom
 	denom, err := k.txfeeKeeper.GetBaseDenom(ctx)
 	if err != nil {
@@ -31,7 +29,7 @@ func (k Keeper) chargeTakerFee(ctx sdk.Context, takerFeeCoin sdk.Coin, sender sd
 
 	// If not supported denom, swap on the first pool to get some pool base denom, which has liquidity with DYM
 	ctx.Logger().Debug("taker fee coin is not supported by txfee module, requires swap", "takerFeeCoin", takerFeeCoin)
-	swappedTakerFee, err := k.swapTakerFee(ctx, sender, routes, takerFeeCoin, denomOut)
+	swappedTakerFee, err := k.swapTakerFee(ctx, sender, route, takerFeeCoin)
 	if err != nil {
 		return err
 	}
@@ -40,30 +38,14 @@ func (k Keeper) chargeTakerFee(ctx sdk.Context, takerFeeCoin sdk.Coin, sender sd
 }
 
 // swapTakerFee swaps the taker fee coin to the base denom on the first pool
-func (k Keeper) swapTakerFee(ctx sdk.Context, sender sdk.AccAddress, routes poolmanagertypes.SwapRoutesUnion, tokenIn sdk.Coin, denomOut string) (sdk.Coin, error) {
-	firstPool := poolmanagertypes.SwapAmountInRoute{}
-	switch routes.Type {
-	case "out":
-		//transcode the outRoutes to inRoutes
-		firstPool.PoolId = routes.OutRoutes[0].PoolId
-		if len(routes.OutRoutes) > 1 {
-			firstPool.TokenOutDenom = routes.OutRoutes[1].TokenInDenom
-		} else {
-			firstPool.TokenOutDenom = denomOut
-		}
-	case "in":
-		firstPool = routes.InRoutes[0]
-	default:
-		return sdk.Coin{}, fmt.Errorf("invalid route type %s", routes.Type)
-	}
-
+func (k Keeper) swapTakerFee(ctx sdk.Context, sender sdk.AccAddress, route poolmanagertypes.SwapAmountInRoute, tokenIn sdk.Coin) (sdk.Coin, error) {
 	minAmountOut := sdk.ZeroInt()
-	swapRoutes := poolmanagertypes.SwapAmountInRoutes{firstPool}
+	swapRoutes := poolmanagertypes.SwapAmountInRoutes{route}
 	out, err := k.poolManager.RouteExactAmountIn(ctx, sender, swapRoutes, tokenIn, minAmountOut)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
-	coin := sdk.NewCoin(firstPool.TokenOutDenom, out)
+	coin := sdk.NewCoin(route.TokenOutDenom, out)
 	return coin, nil
 }
 
