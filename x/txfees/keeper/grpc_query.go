@@ -47,12 +47,17 @@ func (q Querier) DenomSpotPrice(ctx context.Context, req *types.QueryDenomSpotPr
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
-	spotPrice, err := q.CalcFeeSpotPrice(sdkCtx, req.Denom)
+	baseDenom, err := q.GetBaseDenom(sdkCtx)
 	if err != nil {
 		return nil, err
 	}
 
-	feeToken, err := q.GetFeeToken(sdkCtx, req.GetDenom())
+	feeToken, err := q.GetFeeToken(sdkCtx, req.Denom)
+	if err != nil {
+		return nil, err
+	}
+
+	spotPrice, err := q.spotPriceCalculator.CalculateSpotPrice(sdkCtx, feeToken.PoolID, baseDenom, feeToken.Denom)
 	if err != nil {
 		return nil, err
 	}

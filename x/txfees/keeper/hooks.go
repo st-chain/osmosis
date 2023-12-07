@@ -66,7 +66,8 @@ func (k Keeper) AfterEpochEnd(ctx sdk.Context, epochIdentifier string, epochNumb
 		}
 		_, err = k.poolManager.RouteExactAmountIn(ctx, moduleAddr, route, coinBalance, sdk.ZeroInt())
 		if err != nil {
-			return err
+			k.Logger(ctx).Error("failed to swap fee token to base token", "error", err)
+			continue
 		}
 	}
 
