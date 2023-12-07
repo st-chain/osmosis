@@ -145,7 +145,7 @@ func (dfd DeductFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bo
 		return ctx, sdkerrors.Wrap(sdkerrors.ErrTxDecode, "Tx must be a FeeTx")
 	}
 
-	// checks to make sure the module account has been set to collect fees in base token
+	// checks to make sure the module account has been set to collect fees in non-base token
 	if addr := dfd.ak.GetModuleAddress(types.ModuleName); addr == nil {
 		return ctx, fmt.Errorf("txfees module account (%s) has not been set", types.ModuleName)
 	}

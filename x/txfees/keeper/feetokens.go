@@ -20,7 +20,12 @@ func (k Keeper) ConvertToBaseToken(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coin
 		return inputFee, nil
 	}
 
-	spotPrice, err := k.CalcFeeSpotPrice(ctx, inputFee.Denom)
+	feeToken, err := k.GetFeeToken(ctx, inputFee.Denom)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	spotPrice, err := k.spotPriceCalculator.CalculateSpotPrice(ctx, feeToken.PoolID, baseDenom, feeToken.Denom)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
@@ -28,30 +33,8 @@ func (k Keeper) ConvertToBaseToken(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coin
 	return sdk.NewCoin(baseDenom, spotPrice.MulInt(inputFee.Amount).RoundInt()), nil
 }
 
-// CalcFeeSpotPrice converts the provided tx fees into their equivalent value in the base denomination.
-// Spot Price Calculation: spotPrice / (1 - swapFee),
-// where spotPrice is defined as:
-// (tokenBalanceIn / tokenWeightIn) / (tokenBalanceOut / tokenWeightOut)
-func (k Keeper) CalcFeeSpotPrice(ctx sdk.Context, inputDenom string) (sdk.Dec, error) {
-	baseDenom, err := k.GetBaseDenom(ctx)
-	if err != nil {
-		return sdk.Dec{}, err
-	}
-
-	feeToken, err := k.GetFeeToken(ctx, inputDenom)
-	if err != nil {
-		return sdk.Dec{}, err
-	}
-
-	spotPrice, err := k.spotPriceCalculator.CalculateSpotPrice(ctx, feeToken.PoolID, baseDenom, feeToken.Denom)
-	if err != nil {
-		return sdk.Dec{}, err
-	}
-	return spotPrice, nil
-}
-
 // GetFeeToken returns the fee token record for a specific denom,
-// In our case the baseDenom is uosmo.
+// In our case the baseDenom is udym.
 func (k Keeper) GetBaseDenom(ctx sdk.Context) (denom string, err error) {
 	store := ctx.KVStore(k.storeKey)
 
