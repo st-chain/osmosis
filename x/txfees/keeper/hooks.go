@@ -1,8 +1,11 @@
 package keeper
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 	epochstypes "github.com/osmosis-labs/osmosis/v15/x/epochs/types"
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
@@ -54,6 +57,10 @@ func (k Keeper) AfterEpochEnd(ctx sdk.Context, epochIdentifier string, epochNumb
 		feetoken, err := k.GetFeeToken(ctx, coinBalance.Denom)
 		if err != nil {
 			k.Logger(ctx).Error("unknown fee token", "denom", coinBalance.Denom, "error", err)
+			err := k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(coinBalance))
+			if err != nil {
+				k.Logger(ctx).Error("failed to burn non-native coins", "error", err)
+			}
 			continue
 		}
 
@@ -64,10 +71,17 @@ func (k Keeper) AfterEpochEnd(ctx sdk.Context, epochIdentifier string, epochNumb
 				TokenOutDenom: baseDenom,
 			},
 		}
-		_, err = k.poolManager.RouteExactAmountIn(ctx, moduleAddr, route, coinBalance, sdk.ZeroInt())
+		wrappedRouteExactAmountInFn := func(ctx sdk.Context) error {
+			_, err := k.poolManager.RouteExactAmountIn(ctx, moduleAddr, route, coinBalance, sdk.ZeroInt())
+			return err
+		}
+		err = osmoutils.ApplyFuncIfNoError(ctx, wrappedRouteExactAmountInFn)
 		if err != nil {
-			k.Logger(ctx).Error("failed to swap fee token to base token", "error", err)
-			continue
+			ctx.Logger().Error(fmt.Sprintf("failed to swap fee token to base token: %v. Trying to burn the tokens", err))
+			err := k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(coinBalance))
+			if err != nil {
+				k.Logger(ctx).Error("failed to burn non-native coins", "error", err)
+			}
 		}
 	}
 
