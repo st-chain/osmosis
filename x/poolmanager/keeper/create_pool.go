@@ -60,15 +60,24 @@ func (k Keeper) CreatePool(ctx sdk.Context, msg types.CreatePoolMsg) (uint64, er
 		return 0, fmt.Errorf("cannot create module account %s, "+
 			"due to an account at that address already exists", poolAddr)
 	}
-	k.accountKeeper.SetModuleAccount(ctx, authtypes.NewEmptyModuleAccount(poolName))
+	// Create a new module account for the pool.
+	moduleAccount := authtypes.NewEmptyModuleAccount(poolName)
+	moduleAccountI, ok := (k.accountKeeper.NewAccount(ctx, moduleAccount)).(authtypes.ModuleAccountI) // set the account number
+	if !ok {
+		return 0, fmt.Errorf("cannot create module account %s, "+
+			"failed to set account number", poolAddr)
+	}
+	k.accountKeeper.SetModuleAccount(ctx, moduleAccountI)
 
 	pool, err := msg.CreatePool(ctx, poolId)
 	if err != nil {
 		return 0, err
 	}
 
+	// Store the pool ID to pool type mapping in state.
 	k.SetPoolRoute(ctx, poolId, msg.GetPoolType())
 
+	// Validates the pool address and pool ID stored match what was expected.
 	if err := k.validateCreatedPool(poolId, pool); err != nil {
 		return 0, err
 	}
