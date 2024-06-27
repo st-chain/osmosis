@@ -7,9 +7,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/osmosis-labs/osmosis/v15/app/apptesting"
 	_ "github.com/osmosis-labs/osmosis/v15/osmoutils"
 	"github.com/osmosis-labs/osmosis/v15/osmoutils/osmoassert"
+	"github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
 	keeper "github.com/osmosis-labs/osmosis/v15/x/gamm/keeper"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	balancertypes "github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
@@ -30,7 +30,7 @@ var (
 	// pool assets
 	defaultDymAsset = balancertypes.PoolAsset{
 		Weight: sdk.NewInt(100),
-		Token:  sdk.NewCoin("adym", sdk.NewInt(10000)),
+		Token:  sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(10000)),
 	}
 	defaultBarAsset = balancertypes.PoolAsset{
 		Weight: sdk.NewInt(100),

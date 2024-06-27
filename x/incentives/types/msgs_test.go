@@ -4,15 +4,14 @@ import (
 	"testing"
 	time "time"
 
+	"github.com/cometbft/cometbft/crypto/ed25519"
 	"github.com/stretchr/testify/require"
-	"github.com/tendermint/tendermint/crypto/ed25519"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/osmosis-labs/osmosis/v15/app/apptesting"
+	"github.com/osmosis-labs/osmosis/v15/testutils"
+	"github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
 	incentivestypes "github.com/osmosis-labs/osmosis/v15/x/incentives/types"
-
-	appParams "github.com/dymensionxyz/dymension/v3/app/params"
 
 	lockuptypes "github.com/osmosis-labs/osmosis/v15/x/lockup/types"
 )
@@ -218,7 +217,7 @@ func TestMsgAddToGauge(t *testing.T) {
 
 // // Test authz serialize and de-serializes for incentives msg.
 func TestAuthzMsg(t *testing.T) {
-	appParams.SetAddressPrefixes()
+	apptesting.SetAddressPrefixes()
 	pk1 := ed25519.GenPrivKey().PubKey()
 	addr1 := sdk.AccAddress(pk1.Address()).String()
 	coin := sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(1))
@@ -259,7 +258,7 @@ func TestAuthzMsg(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			apptesting.TestMessageAuthzSerialization(t, tc.incentivesMsg)
+			testutils.TestMessageAuthzSerialization(t, tc.incentivesMsg)
 		})
 	}
 }

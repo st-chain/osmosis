@@ -4,12 +4,13 @@ import (
 	"testing"
 	"time"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	osmoapp "github.com/dymensionxyz/dymension/v3/app"
-	apptesting "github.com/dymensionxyz/dymension/v3/app/apptesting"
+	apptesting "github.com/osmosis-labs/osmosis/v15/testutils"
+
+	osmoapp "github.com/osmosis-labs/osmosis/v15/app"
 
 	"github.com/osmosis-labs/osmosis/v15/x/lockup"
 	"github.com/osmosis-labs/osmosis/v15/x/lockup/types"
@@ -51,7 +52,7 @@ var (
 )
 
 func TestInitGenesis(t *testing.T) {
-	app := apptesting.Setup(t, false)
+	app := apptesting.Setup(false, "")
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 	ctx = ctx.WithBlockTime(now.Add(time.Second))
 	genesis := testGenesis
@@ -74,7 +75,7 @@ func TestInitGenesis(t *testing.T) {
 }
 
 func TestExportGenesis(t *testing.T) {
-	app := apptesting.Setup(t, false)
+	app := apptesting.Setup(false, "")
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 	ctx = ctx.WithBlockTime(now.Add(time.Second))
 	genesis := testGenesis
@@ -123,7 +124,7 @@ func TestExportGenesis(t *testing.T) {
 }
 
 func TestMarshalUnmarshalGenesis(t *testing.T) {
-	app := apptesting.Setup(t, false)
+	app := apptesting.Setup(false, "")
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 	ctx = ctx.WithBlockTime(now.Add(time.Second))
 
@@ -138,7 +139,7 @@ func TestMarshalUnmarshalGenesis(t *testing.T) {
 
 	genesisExported := am.ExportGenesis(ctx, appCodec)
 	assert.NotPanics(t, func() {
-		app := apptesting.Setup(t, false)
+		app := apptesting.Setup(false, "")
 		ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 		ctx = ctx.WithBlockTime(now.Add(time.Second))
 		am := lockup.NewAppModule(*app.LockupKeeper, app.AccountKeeper, app.BankKeeper)

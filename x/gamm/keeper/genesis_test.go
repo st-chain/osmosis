@@ -7,23 +7,23 @@ import (
 
 	bankutil "github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
+	"github.com/cometbft/cometbft/crypto/ed25519"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tendermint/tendermint/crypto/ed25519"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	osmoapp "github.com/dymensionxyz/dymension/v3/app"
+	osmoapp "github.com/osmosis-labs/osmosis/v15/app"
 
 	"github.com/osmosis-labs/osmosis/v15/x/gamm"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 
-	apptesting "github.com/dymensionxyz/dymension/v3/app/apptesting"
+	apptesting "github.com/osmosis-labs/osmosis/v15/testutils"
 )
 
 func TestGammInitGenesis(t *testing.T) {
-	app := apptesting.Setup(t, false)
+	app := apptesting.Setup(false, "")
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 
 	balancerPool, err := balancer.NewBalancerPool(1, balancer.PoolParams{
@@ -74,11 +74,12 @@ func TestGammInitGenesis(t *testing.T) {
 	require.Error(t, err)
 
 	liquidity := app.GAMMKeeper.GetTotalLiquidity(ctx)
-	require.Equal(t, liquidity, sdk.Coins{sdk.NewInt64Coin("nodetoken", 10), sdk.NewInt64Coin(sdk.DefaultBondDenom, 10)})
+	expectedValue := sdk.Coins{sdk.NewInt64Coin("nodetoken", 10), sdk.NewInt64Coin(sdk.DefaultBondDenom, 10)}
+	require.Equal(t, liquidity, expectedValue.Sort())
 }
 
 func TestGammExportGenesis(t *testing.T) {
-	app := apptesting.Setup(t, false)
+	app := apptesting.Setup(false, "")
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 
 	acc1 := sdk.AccAddress(ed25519.GenPrivKey().PubKey().Address().Bytes())
@@ -126,7 +127,7 @@ func TestGammExportGenesis(t *testing.T) {
 }
 
 func TestMarshalUnmarshalGenesis(t *testing.T) {
-	app := apptesting.Setup(t, false)
+	app := apptesting.Setup(false, "")
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 
 	encodingConfig := osmoapp.MakeEncodingConfig()

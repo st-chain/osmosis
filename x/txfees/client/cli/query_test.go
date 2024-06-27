@@ -8,7 +8,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/osmosis-labs/osmosis/v15/app/apptesting"
+	"github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
 
@@ -24,9 +24,11 @@ func (s *QueryTestSuite) SetupSuite() {
 	// set up pool
 	poolAssets := []sdk.Coin{
 		sdk.NewInt64Coin("uosmo", 1000000),
-		sdk.NewInt64Coin("stake", 120000000),
+		sdk.NewInt64Coin("adym", 120000000),
 	}
 	s.PrepareBalancerPoolWithCoins(poolAssets...)
+	err := s.App.TxFeesKeeper.SetFeeTokens(s.Ctx, []types.FeeToken{{Denom: "uosmo", PoolID: 1}})
+	s.Require().NoError(err)
 
 	s.Commit()
 }

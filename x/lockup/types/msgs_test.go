@@ -10,15 +10,14 @@ import (
 
 	"github.com/osmosis-labs/osmosis/v15/x/lockup/types"
 
-	"github.com/tendermint/tendermint/crypto/ed25519"
+	"github.com/cometbft/cometbft/crypto/ed25519"
 
-	appParams "github.com/dymensionxyz/dymension/v3/app/params"
-
-	apptesting "github.com/osmosis-labs/osmosis/v15/app/apptesting"
+	"github.com/osmosis-labs/osmosis/v15/testutils"
+	apptesting "github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
 )
 
 func TestMsgLockTokens(t *testing.T) {
-	appParams.SetAddressPrefixes()
+	apptesting.SetAddressPrefixes()
 	addr1, invalidAddr := apptesting.GenerateTestAddrs()
 
 	tests := []struct {
@@ -86,7 +85,7 @@ func TestMsgLockTokens(t *testing.T) {
 }
 
 func TestMsgBeginUnlockingAll(t *testing.T) {
-	appParams.SetAddressPrefixes()
+	apptesting.SetAddressPrefixes()
 	addr1, invalidAddr := apptesting.GenerateTestAddrs()
 
 	tests := []struct {
@@ -126,7 +125,7 @@ func TestMsgBeginUnlockingAll(t *testing.T) {
 }
 
 func TestMsgBeginUnlocking(t *testing.T) {
-	appParams.SetAddressPrefixes()
+	apptesting.SetAddressPrefixes()
 	addr1, invalidAddr := apptesting.GenerateTestAddrs()
 
 	tests := []struct {
@@ -204,7 +203,7 @@ func TestMsgBeginUnlocking(t *testing.T) {
 }
 
 func TestMsgExtendLockup(t *testing.T) {
-	appParams.SetAddressPrefixes()
+	apptesting.SetAddressPrefixes()
 	addr1, invalidAddr := apptesting.GenerateTestAddrs()
 
 	tests := []struct {
@@ -303,7 +302,7 @@ func TestAuthzMsg(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			apptesting.TestMessageAuthzSerialization(t, tc.msg)
+			testutils.TestMessageAuthzSerialization(t, tc.msg)
 		})
 	}
 }
