@@ -51,7 +51,7 @@ require (
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cosmos/gogoproto v1.4.10
-	github.com/cosmos/ibc-go/v7 v7.5.1
+	github.com/cosmos/ibc-go/v7 v7.6.0
 	github.com/creachadair/taskgroup v0.4.2 // indirect
 	github.com/curioswitch/go-reassign v0.2.0 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
