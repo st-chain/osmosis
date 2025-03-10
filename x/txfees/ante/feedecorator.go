@@ -67,7 +67,7 @@ func (mfd MempoolFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate b
 
 	feeCoins := feeTx.GetFee()
 	if feeCoins.IsZero() {
-		return ctx, sdkerrors.Wrapf(sdkerrors.ErrInsufficientFee, "no fees provided")
+		return next(ctx, tx, simulate)
 	}
 	// You should only be able to pay with one fee token in a single tx
 	if len(feeCoins) > 1 {
